@@ -1,870 +1,339 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NullClaw - 极致轻量AI智能体</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --accent: #22d3ee;
-            --bg-dark: #0f0f23;
-            --bg-card: #1a1a2e;
-            --bg-card-hover: #252542;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: #2e2e4a;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-            --gradient-2: linear-gradient(135deg, #22d3ee 0%, #6366f1 100%);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        /* Animated Background */
-        .bg-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.4;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            padding: 16px 0;
-            background: rgba(15, 15, 35, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        nav .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding-top: 80px;
-            position: relative;
-        }
-
-        .hero-content {
-            text-align: center;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 50px;
-            font-size: 0.875rem;
-            color: var(--accent);
-            margin-bottom: 32px;
-        }
-
-        .badge::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-        }
-
-        .hero h1 {
-            font-size: clamp(2.5rem, 8vw, 5rem);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 24px;
-            letter-spacing: -0.02em;
-        }
-
-        .hero h1 .highlight {
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 700px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: var(--gradient-1);
-            color: white;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
-        }
-
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--primary);
-        }
-
-        /* Stats */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 24px;
-            margin-top: 80px;
-            padding: 40px;
-            background: var(--bg-card);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: var(--gradient-2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-label {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-            margin-top: 4px;
-        }
-
-        /* Section Styles */
-        section {
-            padding: 120px 0;
-        }
-
-        .section-header {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 64px;
-        }
-
-        .section-header h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .section-header p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        /* Features Grid */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
-        .feature-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 32px;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--primary);
-            transform: translateY(-4px);
-        }
-
-        .feature-icon {
-            width: 56px;
-            height: 56px;
-            background: rgba(99, 102, 241, 0.15);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .feature-card p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        /* Comparison Table */
-        .comparison {
-            background: var(--bg-card);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .comparison table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .comparison th,
-        .comparison td {
-            padding: 20px 24px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .comparison th {
-            background: rgba(99, 102, 241, 0.1);
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-        }
-
-        .comparison tr:last-child td {
-            border-bottom: none;
-        }
-
-        .comparison tr:hover td {
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        .check {
-            color: var(--success);
-            font-weight: bold;
-        }
-
-        .cross {
-            color: var(--text-muted);
-        }
-
-        /* Code Block */
-        .code-section {
-            background: var(--bg-card);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .code-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 24px;
-            background: rgba(0, 0, 0, 0.3);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .code-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .code-dot.red { background: #ff5f56; }
-        .code-dot.yellow { background: #ffbd2e; }
-        .code-dot.green { background: #27ca40; }
-
-        .code-content {
-            padding: 24px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            line-height: 1.8;
-            overflow-x: auto;
-        }
-
-        .code-content .comment { color: var(--text-muted); }
-        .code-content .keyword { color: #c792ea; }
-        .code-content .string { color: #c3e88d; }
-        .code-content .function { color: #82aaff; }
-        .code-content .number { color: #f78c6c; }
-
-        /* Use Cases */
-        .use-cases {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-        }
-
-        .use-case {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 28px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .use-case::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-1);
-        }
-
-        .use-case h4 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .use-case p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        /* CTA Section */
-        .cta {
-            text-align: center;
-            padding: 80px 40px;
-            background: var(--bg-card);
-            border-radius: 32px;
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .cta h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .cta p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            margin-bottom: 32px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-            position: relative;
-        }
-
-        /* Footer */
-        footer {
-            padding: 40px 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-
-        footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: var(--accent);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-                padding: 24px;
-            }
-
-            .stat-value {
-                font-size: 1.75rem;
-            }
-
-            section {
-                padding: 80px 0;
-            }
-
-            .section-header h2 {
-                font-size: 2rem;
-            }
-
-            .comparison {
-                overflow-x: auto;
-            }
-
-            .comparison table {
-                min-width: 600px;
-            }
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-in {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>母亲节快乐 · 康乃馨</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: radial-gradient(circle at center, #fce4ec 0%, #f8bbd0 40%, #f48fb1 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", "苹方", "华文楷体", "KaiTi", cursive, sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .blessing {
+      position: absolute;
+      z-index: 2;
+      bottom: 18%;
+      text-align: center;
+      color: #d81b60;
+      text-shadow: 2px 2px 8px rgba(255,255,255,0.7);
+      opacity: 0;
+      transition: opacity 3s ease;
+      pointer-events: none;
+    }
+    .blessing.show {
+      opacity: 1;
+    }
+    .blessing h1 {
+      font-size: clamp(2.5rem, 10vw, 4.5rem);
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.3rem;
+    }
+    .blessing p {
+      font-size: clamp(1rem, 3.5vw, 1.5rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      color: #ad1457;
+    }
+  </style>
 </head>
 <body>
-    <div class="bg-pattern"></div>
+  <canvas id="flowerCanvas"></canvas>
+  <div class="blessing" id="blessing">
+    <h1>母亲节快乐</h1>
+    <p>结果我还是在路上抽空做了</p>
+  </div>
 
-    <!-- Navigation -->
-    <nav>
-        <div class="container">
-            <div class="logo">NullClaw</div>
-            <ul class="nav-links">
-                <li><a href="#features">特性</a></li>
-                <li><a href="#comparison">对比</a></li>
-                <li><a href="#use-cases">场景</a></li>
-            </ul>
-        </div>
-    </nav>
+  <script>
+    (function() {
+      const canvas = document.getElementById('flowerCanvas');
+      const ctx = canvas.getContext('2d');
+      const blessing = document.getElementById('blessing');
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="badge">
-                    <span>正式发布</span>
-                </div>
-                <h1>
-                    <span class="highlight">678KB</span> 的 AI 智能体<br>
-                    重新定义轻量化
-                </h1>
-                <p>
-                    基于 Zig 语言构建的极致轻量 AI Agent 框架。零依赖、毫秒级启动、全架构支持——让任何设备都能运行强大的 AI 助手。
-                </p>
-                <div class="hero-buttons">
-                    <a href="https://github.com/openclaw/nullclaw" class="btn btn-primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                        GitHub 仓库
-                    </a>
-                </div>
+      let width, height, centerX, centerY;
+      let animationStart = null;
+      const bloomDuration = 2800; // 盛开动画持续时间(ms)
+      const totalDuration = 4500; // 完全展示后文字出现的时间(ms)
+      let petals = []; // 飘落花瓣数组
+      const maxPetals = 35;
 
-                <div class="stats">
-                    <div class="stat">
-                        <div class="stat-value">678KB</div>
-                        <div class="stat-label">二进制体积</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">5ms</div>
-                        <div class="stat-label">冷启动时间</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">0.8MB</div>
-                        <div class="stat-label">运行时内存</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">3x</div>
-                        <div class="stat-label">响应速度提升</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">99.2%</div>
-                        <div class="stat-label">任务准确率</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+      // ---------- 自适应尺寸 ----------
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        centerX = width * 0.5;
+        centerY = height * 0.45; // 花朵中心偏上，给文字留空
+      }
+      window.addEventListener('resize', resize);
+      resize();
 
-    <!-- Features Section -->
-    <section id="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>为什么选择 NullClaw？</h2>
-                <p>在 AI Agent 框架日益臃肿的今天，NullClaw 选择了一条不同的路——极致精简，却毫不妥协。</p>
-            </div>
-
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📦</div>
-                    <h3>零依赖部署</h3>
-                    <p>单文件自包含二进制，无需安装任何运行时环境。下载、运行、使用——三步到位，告别繁琐的依赖地狱。</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>毫秒级启动</h3>
-                    <p>5 毫秒冷启动，比传统框架快 200 倍。无论是嵌入式设备还是云服务器，都能瞬间响应。</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🔧</div>
-                    <h3>全架构支持</h3>
-                    <p>原生支持 ARM、x86、RISC-V 全架构。从树莓派到服务器集群，一套代码，处处运行。</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>本地优先</h3>
-                    <p>所有计算在本地完成，数据主权完全掌握在你手中。无需担心隐私泄露，无需信任第三方。</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3>配置化架构</h3>
-                    <p>虚表接口设计，零代码切换核心组件。模型、渠道、内存、沙箱——一切皆可配置替换。</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🧩</div>
-                    <h3>OpenClaw 兼容</h3>
-                    <p>配置字段与 OpenClaw 完全一致，支持直接导入现有配置。老用户零成本迁移，新用户快速上手。</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Comparison Section -->
-    <section id="comparison">
-        <div class="container">
-            <div class="section-header">
-                <h2>与主流框架对比</h2>
-                <p>数据不会说谎。看看 NullClaw 如何在关键指标上脱颖而出。</p>
-            </div>
-
-            <div class="comparison">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>指标</th>
-                            <th>NullClaw</th>
-                            <th>OpenClaw</th>
-                            <th>LangChain</th>
-                            <th>AutoGPT</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>二进制体积</td>
-                            <td><span class="check">678 KB</span></td>
-                            <td>~50 MB</td>
-                            <td>~200 MB</td>
-                            <td>~150 MB</td>
-                        </tr>
-                        <tr>
-                            <td>冷启动时间</td>
-                            <td><span class="check">5 ms</span></td>
-                            <td>~1 s</td>
-                            <td>~3 s</td>
-                            <td>~5 s</td>
-                        </tr>
-                        <tr>
-                            <td>运行时内存</td>
-                            <td><span class="check">0.8 MB</span></td>
-                            <td>~50 MB</td>
-                            <td>~200 MB</td>
-                            <td>~300 MB</td>
-                        </tr>
-                        <tr>
-                            <td>外部依赖</td>
-                            <td><span class="check">零依赖</span></td>
-                            <td>Docker</td>
-                            <td>Python + 多个包</td>
-                            <td>Python + 多个包</td>
-                        </tr>
-                        <tr>
-                            <td>跨平台支持</td>
-                            <td><span class="check">全架构原生</span></td>
-                            <td>容器化</td>
-                            <td>Python 环境</td>
-                            <td>Python 环境</td>
-                        </tr>
-                        <tr>
-                            <td>嵌入式设备</td>
-                            <td><span class="check">完美支持</span></td>
-                            <td>受限</td>
-                            <td class="cross">不支持</td>
-                            <td class="cross">不支持</td>
-                        </tr>
-                        <tr>
-                            <td>学习曲线</td>
-                            <td><span class="check">零门槛</span></td>
-                            <td>中等</td>
-                            <td>较陡</td>
-                            <td>较陡</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Use Cases Section -->
-    <section id="use-cases">
-        <div class="container">
-            <div class="section-header">
-                <h2>适用场景</h2>
-                <p>NullClaw 的轻量化特性使其能够在传统框架无法触及的场景中大放异彩。</p>
-            </div>
-
-            <div class="use-cases">
-                <div class="use-case">
-                    <h4>🏠 智能家居中枢</h4>
-                    <p>在树莓派或路由器上运行，作为本地 AI 助手控制全屋智能设备，响应迅速，隐私安全。</p>
-                </div>
-
-                <div class="use-case">
-                    <h4>📱 IoT 边缘计算</h4>
-                    <p>部署在资源受限的嵌入式设备上，实现本地化的智能决策，无需云端连接。</p>
-                </div>
-
-                <div class="use-case">
-                    <h4>🚀 快速原型开发</h4>
-                    <p>几分钟内搭建 AI Agent 原型，验证想法，无需复杂的开发环境配置。</p>
-                </div>
-
-                <div class="use-case">
-                    <h4>🏢 企业内部部署</h4>
-                    <p>在隔离网络环境中运行，处理敏感数据，满足合规要求，无需外部 API 调用。</p>
-                </div>
-
-                <div class="use-case">
-                    <h4>🎓 教育与研究</h4>
-                    <p>帮助学生快速理解 AI Agent 核心概念，无需被繁重的依赖配置分散注意力。</p>
-                </div>
-
-                <div class="use-case">
-                    <h4>🔄 CI/CD 集成</h4>
-                    <p>在流水线中快速启动 AI 辅助任务，自动化测试、代码审查、文档生成。</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section>
-        <div class="container">
-            <div class="cta">
-                <h2>准备好开始了吗？</h2>
-                <p>加入数千名开发者，体验轻量化 AI Agent 的未来。开源免费，永久如此。</p>
-                <div class="hero-buttons">
-                    <a href="https://github.com/openclaw/nullclaw" class="btn btn-primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                        Star on GitHub
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>
-                NullClaw 是开源项目，基于 MIT 许可证发布。
-                <a href="https://github.com/openclaw/nullclaw">GitHub</a> · 
-                <a href="https://github.com/openclaw/nullclaw/issues">问题反馈</a> · 
-                <a href="https://github.com/openclaw/nullclaw/discussions">社区讨论</a>
-            </p>
-        </div>
-    </footer>
-
-    <script>
-        // Smooth scroll for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Intersection Observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+      // ---------- 花瓣飘落粒子 ----------
+      function createPetal() {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 120 + 30;
+        return {
+          x: centerX + Math.cos(angle) * distance,
+          y: centerY + Math.sin(angle) * distance - 30,
+          vx: (Math.random() - 0.5) * 1.2,
+          vy: Math.random() * 1.5 + 0.5,
+          size: Math.random() * 35 + 20,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.05,
+          opacity: Math.random() * 0.7 + 0.3,
+          color: `rgba(255, ${100 + Math.floor(Math.random() * 80)}, ${130 + Math.floor(Math.random() * 70)}, `,
+          delay: Math.random() * 1000, // 随机启动延迟
         };
+      }
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
+      // 初始化花瓣池
+      function initPetals(count) {
+        petals = [];
+        for (let i = 0; i < count; i++) {
+          const p = createPetal();
+          p.y = centerY - 20 - Math.random() * 80; // 从花朵附近开始
+          petals.push(p);
+        }
+      }
+      initPetals(maxPetals);
 
-        // Observe all feature cards and use cases
-        document.querySelectorAll('.feature-card, .use-case').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
+      // 更新花瓣
+      function updatePetals(elapsed) {
+        for (let p of petals) {
+          if (elapsed < p.delay) continue; // 延迟出现
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rotation += p.rotSpeed;
+          // 边界重置：飘出画面或太远则重新生成
+          if (p.y > height + 50 || p.x < -80 || p.x > width + 80 || p.y < -100) {
+            Object.assign(p, createPetal());
+            p.y = centerY - 30;
+            p.x = centerX + (Math.random() - 0.5) * 100;
+          }
+        }
+      }
 
-        // Add parallax effect to background
-        document.addEventListener('mousemove', (e) => {
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            document.querySelector('.bg-pattern').style.transform = 
-                `translate(${x * 20}px, ${y * 20}px)`;
-        });
-    </script>
+      // 绘制单个飘落花瓣形状（心形 / 康乃馨花瓣简化）
+      function drawFloatingPetal(ctx, x, y, size, rotation, opacity, colorBase) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation);
+        ctx.globalAlpha = opacity;
+        // 用两个椭圆组成心形花瓣
+        ctx.beginPath();
+        const s = size * 0.5;
+        ctx.ellipse(-s * 0.45, -s * 0.25, s * 0.4, s * 0.8, -0.4, 0, Math.PI * 2);
+        ctx.ellipse(s * 0.45, -s * 0.25, s * 0.4, s * 0.8, 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = colorBase + opacity + ')';
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // ---------- 绘制康乃馨（多层锯齿花瓣） ----------
+      function drawCarnation(bloomProgress) {
+        // bloomProgress: 0 花苞 -> 1 完全盛开
+        const layers = 6;          // 花瓣层数
+        const petalsPerLayer = 12; // 每层花瓣数
+        const baseRadius = Math.min(width, height) * 0.18;
+        const maxScale = 1.0;
+        // 花苞时花瓣极度内收，radiusFactor 从0.2变到1.0
+        const radiusFactor = 0.2 + bloomProgress * 0.8;
+        const scaleFactor = 0.3 + bloomProgress * 0.7; // 花瓣大小缩放
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+
+        // 逐层绘制，外层先画，内层后画（形成层叠效果）
+        for (let l = layers; l >= 0; l--) {
+          const layerProgress = l / layers; // 0(中心) ~ 1(最外层)
+          // 该层半径：花苞时所有层挤在一起，盛开时外扩
+          const layerRadius = baseRadius * (0.35 + layerProgress * 1.2) * radiusFactor;
+          // 内层颜色深，外层颜色浅
+          const redBase = 210 + Math.floor(layerProgress * 45);
+          const greenBase = 30 + Math.floor(layerProgress * 40);
+          const blueBase = 60 + Math.floor(layerProgress * 40);
+          const colorInner = `rgb(${redBase}, ${greenBase}, ${blueBase})`;
+          const colorOuter = `rgb(${redBase + 30}, ${greenBase + 30}, ${blueBase + 40})`;
+
+          // 每层花瓣绕圈分布
+          const petalsCount = petalsPerLayer - l * 2; // 外层花瓣少一点，内层密集
+          const angleStep = (Math.PI * 2) / petalsCount;
+
+          for (let i = 0; i < petalsCount; i++) {
+            const angle = i * angleStep + (l * 0.25); // 每层错开角度
+            const x = Math.cos(angle) * layerRadius;
+            const y = Math.sin(angle) * layerRadius;
+
+            ctx.save();
+            ctx.translate(x, y);
+            // 花瓣朝外倾斜
+            ctx.rotate(angle + Math.PI / 2 + (Math.random() - 0.5) * 0.2 * bloomProgress);
+
+            // 花瓣大小：内层小，外层大，并随 bloom 缩放
+            const petalLength = baseRadius * (0.45 + layerProgress * 0.7) * scaleFactor * (0.8 + Math.random() * 0.4);
+            const petalWidth = petalLength * (0.35 + Math.random() * 0.2);
+
+            // 绘制锯齿花瓣（用多个椭圆/波浪边模拟）
+            ctx.beginPath();
+            // 使用三次贝塞尔曲线画一个带波浪边的水滴形
+            const waveCount = 5;
+            const stepAngle = Math.PI / (waveCount + 1);
+            // 左侧波浪
+            ctx.moveTo(0, -petalLength * 0.15); // 花心连接处
+            for (let w = 0; w <= waveCount; w++) {
+              const t = w / waveCount;
+              const px = -Math.sin(t * Math.PI) * petalWidth * (1 - t * 0.5);
+              const py = -petalLength * 0.2 - t * petalLength * 0.8;
+              // 波浪偏移
+              const waveOffset = Math.sin(t * Math.PI * 2) * petalWidth * 0.25 * (1 - t);
+              ctx.lineTo(px + waveOffset * 0.6, py);
+            }
+            // 右侧波浪（反向回来）
+            for (let w = waveCount; w >= 0; w--) {
+              const t = w / waveCount;
+              const px = Math.sin(t * Math.PI) * petalWidth * (1 - t * 0.5);
+              const py = -petalLength * 0.2 - t * petalLength * 0.8;
+              const waveOffset = Math.sin(t * Math.PI * 2) * petalWidth * 0.25 * (1 - t);
+              ctx.lineTo(px + waveOffset * 0.6, py);
+            }
+            ctx.closePath();
+
+            // 渐变色填充
+            const gradient = ctx.createLinearGradient(0, -petalLength * 0.2, 0, -petalLength);
+            gradient.addColorStop(0, colorInner);
+            gradient.addColorStop(0.6, colorOuter);
+            gradient.addColorStop(1, '#f8bbd0');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(180, 40, 70, 0.25)';
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+
+            ctx.restore();
+          }
+        }
+
+        // 花蕊（中心绒毛感）
+        ctx.beginPath();
+        ctx.arc(0, 0, baseRadius * 0.15 * scaleFactor, 0, Math.PI * 2);
+        ctx.fillStyle = '#f9f3b0';
+        ctx.fill();
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2;
+          const rx = Math.cos(a) * baseRadius * 0.12;
+          const ry = Math.sin(a) * baseRadius * 0.12;
+          ctx.beginPath();
+          ctx.arc(rx, ry, baseRadius * 0.04, 0, Math.PI * 2);
+          ctx.fillStyle = '#fff9c4';
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      // ---------- 绘制背景光晕 ----------
+      function drawGlow() {
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        const glowSize = Math.min(width, height) * 0.5;
+        const gradient = ctx.createRadialGradient(0, 0, glowSize * 0.3, 0, 0, glowSize);
+        gradient.addColorStop(0, 'rgba(255, 235, 238, 0.5)');
+        gradient.addColorStop(0.6, 'rgba(248, 187, 208, 0.2)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
+        ctx.restore();
+      }
+
+      // ---------- 动画循环 ----------
+      function animate(timestamp) {
+        if (!animationStart) animationStart = timestamp;
+        const elapsed = timestamp - animationStart;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // 背景光晕
+        drawGlow();
+
+        // 盛开进度 (0->1)
+        let bloomProgress = Math.min(elapsed / bloomDuration, 1.0);
+        // 使用缓出函数让绽放更自然
+        bloomProgress = 1 - Math.pow(1 - bloomProgress, 3); // ease-out cubic
+
+        // 绘制康乃馨
+        drawCarnation(bloomProgress);
+
+        // 更新并绘制飘落花瓣（花苞阶段少量飘落，盛开后增多）
+        const activePetalCount = bloomProgress < 0.4 ? 5 : (bloomProgress < 0.8 ? 20 : maxPetals);
+        updatePetals(elapsed);
+        for (let i = 0; i < petals.length; i++) {
+          if (i < activePetalCount) {
+            const p = petals[i];
+            if (elapsed >= p.delay) {
+              drawFloatingPetal(ctx, p.x, p.y, p.size, p.rotation, p.opacity, p.color);
+            }
+          }
+        }
+
+        // 文字渐显 (在花朵基本盛开后)
+        if (elapsed > totalDuration) {
+          blessing.classList.add('show');
+        }
+
+        // 继续动画循环（飘落持续）
+        requestAnimationFrame(animate);
+      }
+
+      // 启动！
+      resize(); // 确保中心点正确
+      requestAnimationFrame(animate);
+
+      // 点击或触摸时增加飘落花瓣小惊喜
+      window.addEventListener('click', (e) => {
+        const x = e.clientX;
+        const y = e.clientY;
+        // 添加几个临时花瓣从点击位置飘出
+        for (let i = 0; i < 3; i++) {
+          petals.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 2.5,
+            vy: Math.random() * -2 - 1,
+            size: Math.random() * 30 + 15,
+            rotation: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.08,
+            opacity: 0.9,
+            color: `rgba(255, ${100 + Math.floor(Math.random() * 80)}, ${130 + Math.floor(Math.random() * 70)}, `,
+            delay: 0,
+          });
+        }
+        // 防止花瓣数量无限增多，保留上限
+        if (petals.length > maxPetals + 15) {
+          petals.splice(0, petals.length - maxPetals - 10);
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
