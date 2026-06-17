@@ -1,339 +1,361 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>母亲节快乐 · 康乃馨</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      background: radial-gradient(circle at center, #fce4ec 0%, #f8bbd0 40%, #f48fb1 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      font-family: "PingFang SC", "Microsoft YaHei", "苹方", "华文楷体", "KaiTi", cursive, sans-serif;
-      overflow: hidden;
-      position: relative;
-    }
-    canvas {
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-    .blessing {
-      position: absolute;
-      z-index: 2;
-      bottom: 18%;
-      text-align: center;
-      color: #d81b60;
-      text-shadow: 2px 2px 8px rgba(255,255,255,0.7);
-      opacity: 0;
-      transition: opacity 3s ease;
-      pointer-events: none;
-    }
-    .blessing.show {
-      opacity: 1;
-    }
-    .blessing h1 {
-      font-size: clamp(2.5rem, 10vw, 4.5rem);
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.3rem;
-    }
-    .blessing p {
-      font-size: clamp(1rem, 3.5vw, 1.5rem);
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      color: #ad1457;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能机器人中控平台</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --accent: #10b981;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --wall: #cbd5e1;
+            --floor: #1e293b;
+            --furniture: #334155;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; }
+        body { background: var(--bg-dark); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+
+        /* --- 左侧控制台 --- */
+        .console {
+            width: 340px; min-width: 340px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            padding: 32px 24px;
+            display: flex; flex-direction: column; gap: 28px;
+            z-index: 100;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .brand-icon { width: 36px; height: 36px; background: var(--primary); border-radius: 10px; display: grid; place-items: center; font-size: 18px; }
+        .brand h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+
+        .status-card {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px;
+        }
+        .status-dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
+        .status-info h3 { font-size: 14px; font-weight: 600; }
+        .status-info p { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+        .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-sub); font-weight: 700; }
+
+        .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .nav-btn {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            color: var(--text-main); padding: 14px 12px; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 500;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+        .nav-btn.active { background: rgba(59,130,246,0.15); border-color: var(--primary); color: var(--primary); }
+
+        .action-area { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; box-shadow: 0 4px 20px var(--primary-glow); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--primary-glow); }
+
+        .btn-voice { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); }
+        .btn-voice.listening { background: rgba(239,68,68,0.12); border-color: #ef4444; color: #ef4444; animation: voicePulse 1.5s infinite; }
+
+        .voice-hint { font-size: 12px; color: var(--text-sub); text-align: center; min-height: 18px; }
+
+        @keyframes voicePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
+
+        /* --- 右侧地图区 --- */
+        .map-container {
+            flex: 1; position: relative; overflow: hidden;
+            background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 24px 24px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        svg.floor-plan { width: 90%; height: 90%; max-width: 960px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4)); }
+        .wall { fill: none; stroke: var(--wall); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+        .room { fill: var(--floor); stroke: none; transition: fill 0.3s; cursor: crosshair; }
+        .room:hover { fill: #27354d; }
+        .furniture { fill: var(--furniture); opacity: 0.6; pointer-events: none; }
+        .room-label { fill: var(--text-sub); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; opacity: 0.5; }
+
+        /* 我的位置标记 - 使用SVG内嵌，跟随坐标系 */
+        .my-location-group { pointer-events: none; }
+        .my-dot { fill: var(--accent); stroke: #fff; stroke-width: 3; filter: drop-shadow(0 0 6px var(--accent)); }
+        .my-ring { fill: none; stroke: var(--accent); stroke-width: 2; transform-origin: center; animation: myPing 2s ease-out infinite; }
+        .my-label-text { fill: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-anchor: middle; }
+        @keyframes myPing { 0% { r: 8; opacity: 0.8; } 100% { r: 30; opacity: 0; } }
+
+        /* 机器人 - 使用SVG内嵌，跟随坐标系 */
+        .robot-group { transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1); pointer-events: none; }
+        .robot-body { fill: var(--primary); stroke: #fff; stroke-width: 3; filter: drop-shadow(0 0 10px var(--primary-glow)); }
+        .robot-icon { font-size: 18px; text-anchor: middle; dominant-baseline: central; }
+        .robot-dir { fill: #fff; }
+
+        /* 目标点 */
+        .target-group { pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+        .target-ring { fill: none; stroke: var(--primary); stroke-width: 2; transform-origin: center; animation: targetRipple 0.8s ease-out infinite; }
+        .target-ring-delay { animation-delay: 0.4s; }
+        @keyframes targetRipple { 0% { r: 4; opacity: 1; } 100% { r: 28; opacity: 0; } }
+
+        /* 坐标显示 */
+        .coords-overlay {
+            position: absolute; bottom: 20px; right: 24px;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            padding: 8px 16px; border-radius: 8px; font-family: 'Courier New', monospace;
+            font-size: 12px; color: var(--text-sub); border: 1px solid var(--border);
+        }
+    </style>
 </head>
 <body>
-  <canvas id="flowerCanvas"></canvas>
-  <div class="blessing" id="blessing">
-    <h1>母亲节快乐</h1>
-    <p>结果我还是在路上抽空做了</p>
-  </div>
 
-  <script>
-    (function() {
-      const canvas = document.getElementById('flowerCanvas');
-      const ctx = canvas.getContext('2d');
-      const blessing = document.getElementById('blessing');
+    <!-- 左侧控制台 -->
+    <aside class="console">
+        <div class="brand">
+            <div class="brand-icon">🤖</div>
+            <h1>Robot Console</h1>
+        </div>
 
-      let width, height, centerX, centerY;
-      let animationStart = null;
-      const bloomDuration = 2800; // 盛开动画持续时间(ms)
-      const totalDuration = 4500; // 完全展示后文字出现的时间(ms)
-      let petals = []; // 飘落花瓣数组
-      const maxPetals = 35;
+        <div class="status-card">
+            <div class="status-dot"></div>
+            <div class="status-info">
+                <h3>系统在线</h3>
+                <p id="batteryLevel">电量 87% · 信号良好</p>
+            </div>
+        </div>
 
-      // ---------- 自适应尺寸 ----------
-      function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
-        centerX = width * 0.5;
-        centerY = height * 0.45; // 花朵中心偏上，给文字留空
-      }
-      window.addEventListener('resize', resize);
-      resize();
+        <div>
+            <div class="section-label" style="margin-bottom:12px;">快捷导航</div>
+            <div class="nav-grid">
+                <button class="nav-btn" data-room="living" onclick="navigateTo('living')">🛋️ 客厅</button>
+                <button class="nav-btn" data-room="kitchen" onclick="navigateTo('kitchen')">🍳 厨房</button>
+                <button class="nav-btn" data-room="bedroom" onclick="navigateTo('bedroom')">🛏️ 主卧</button>
+                <button class="nav-btn" data-room="study" onclick="navigateTo('study')">📚 书房</button>
+            </div>
+        </div>
 
-      // ---------- 花瓣飘落粒子 ----------
-      function createPetal() {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * 120 + 30;
-        return {
-          x: centerX + Math.cos(angle) * distance,
-          y: centerY + Math.sin(angle) * distance - 30,
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: Math.random() * 1.5 + 0.5,
-          size: Math.random() * 35 + 20,
-          rotation: Math.random() * Math.PI * 2,
-          rotSpeed: (Math.random() - 0.5) * 0.05,
-          opacity: Math.random() * 0.7 + 0.3,
-          color: `rgba(255, ${100 + Math.floor(Math.random() * 80)}, ${130 + Math.floor(Math.random() * 70)}, `,
-          delay: Math.random() * 1000, // 随机启动延迟
+        <div class="action-area">
+            <div class="voice-hint" id="voiceHint">点击开启语音指令</div>
+            <button class="btn btn-voice" id="voiceBtn" onclick="toggleVoice()">🎙️ 语音控制</button>
+            <button class="btn btn-primary" onclick="comeToMe()">📍 到我身边</button>
+        </div>
+    </aside>
+
+    <!-- 右侧地图 -->
+    <main class="map-container" id="mapContainer">
+        <svg class="floor-plan" id="floorPlan" viewBox="0 0 800 600">
+            <!-- 房间区域 -->
+            <rect class="room" x="40" y="40" width="320" height="260" rx="4" data-room="living"/>
+            <rect class="room" x="360" y="40" width="200" height="200" rx="4" data-room="kitchen"/>
+            <rect class="room" x="560" y="40" width="200" height="280" rx="4" data-room="bedroom"/>
+            <rect class="room" x="360" y="300" width="200" height="260" rx="4" data-room="study"/>
+            <rect class="room" x="40" y="300" width="320" height="260" rx="4" data-room="dining"/>
+
+            <!-- 家具示意 -->
+            <rect class="furniture" x="60" y="80" width="120" height="40" rx="6"/>
+            <rect class="furniture" x="60" y="120" width="40" height="80" rx="6"/>
+            <rect class="furniture" x="120" y="150" width="80" height="50" rx="4"/>
+            <rect class="furniture" x="370" y="50" width="180" height="30" rx="3"/>
+            <rect class="furniture" x="370" y="50" width="30" height="120" rx="3"/>
+            <rect class="furniture" x="600" y="80" width="120" height="180" rx="8"/>
+            <rect class="furniture" x="610" y="60" width="100" height="20" rx="4"/>
+            <rect class="furniture" x="380" y="320" width="160" height="50" rx="4"/>
+            <ellipse class="furniture" cx="200" cy="430" rx="70" ry="45"/>
+
+            <!-- 墙体 -->
+            <path class="wall" d="M40,40 H760 V560 H40 Z"/>
+            <line class="wall" x1="360" y1="40" x2="360" y2="560"/>
+            <line class="wall" x1="560" y1="40" x2="560" y2="320"/>
+            <line class="wall" x1="360" y1="300" x2="560" y2="300"/>
+            <line class="wall" x1="40" y1="300" x2="360" y2="300"/>
+
+            <!-- 门洞 -->
+            <rect x="355" y="180" width="10" height="50" fill="var(--bg-dark)"/>
+            <rect x="355" y="380" width="10" height="50" fill="var(--bg-dark)"/>
+            <rect x="555" y="180" width="10" height="50" fill="var(--bg-dark)"/>
+            <rect x="180" y="295" width="60" height="10" fill="var(--bg-dark)"/>
+
+            <!-- 房间标签 -->
+            <text x="200" y="200" class="room-label">LIVING</text>
+            <text x="460" y="150" class="room-label">KITCHEN</text>
+            <text x="660" y="200" class="room-label">BEDROOM</text>
+            <text x="460" y="440" class="room-label">STUDY</text>
+            <text x="200" y="430" class="room-label">DINING</text>
+
+            <!-- ★ 我的位置 -->
+            <g class="my-location-group" transform="translate(180, 220)">
+                <circle class="my-ring" cx="0" cy="0" r="8"/>
+                <circle class="my-dot" cx="0" cy="0" r="8"/>
+                <text class="my-label-text" x="0" y="-20">MY LOCATION</text>
+            </g>
+
+            <!-- ★ 目标点标记 -->
+            <g class="target-group" id="targetGroup">
+                <circle class="target-ring" cx="0" cy="0" r="4"/>
+                <circle class="target-ring target-ring-delay" cx="0" cy="0" r="4"/>
+            </g>
+
+            <!-- ★ 机器人（SVG内嵌，坐标统一） -->
+            <g class="robot-group" id="robotGroup" transform="translate(240, 180)">
+                <circle class="robot-body" cx="0" cy="0" r="20"/>
+                <polygon class="robot-dir" points="-5,-24 5,-24 0,-32"/>
+                <text class="robot-icon" x="0" y="1">🤖</text>
+            </g>
+        </svg>
+
+        <div class="coords-overlay" id="coordsDisplay">X: 240 &nbsp; Y: 180</div>
+    </main>
+
+<script>
+    // ========== SVG 坐标系配置（viewBox: 0 0 800 600） ==========
+    const ROOM_POSITIONS = {
+        living:   { x: 200, y: 170 },
+        kitchen:  { x: 460, y: 140 },
+        bedroom:  { x: 660, y: 180 },
+        study:    { x: 460, y: 430 },
+        dining:   { x: 200, y: 430 }
+    };
+    // "我的位置"在客厅沙发旁，不再居中
+    const MY_POSITION = { x: 180, y: 220 };
+
+    // ========== DOM ==========
+    const svg         = document.getElementById('floorPlan');
+    const robotGroup  = document.getElementById('robotGroup');
+    const targetGroup = document.getElementById('targetGroup');
+    const coordsDisplay = document.getElementById('coordsDisplay');
+    const voiceBtn    = document.getElementById('voiceBtn');
+    const voiceHint   = document.getElementById('voiceHint');
+    const navBtns     = document.querySelectorAll('.nav-btn');
+
+    let currentX = 240, currentY = 180;
+    let targetTimeout = null;
+
+    // ========== 核心移动函数（SVG坐标系） ==========
+    function moveRobotTo(x, y, label) {
+        // 钳制在viewBox范围内
+        x = Math.max(40, Math.min(760, x));
+        y = Math.max(40, Math.min(560, y));
+        currentX = x;
+        currentY = y;
+
+        // 移动机器人（SVG transform）
+        robotGroup.setAttribute('transform', `translate(${x}, ${y})`);
+
+        // 目标点动画
+        targetGroup.setAttribute('transform', `translate(${x}, ${y})`);
+        targetGroup.style.opacity = '1';
+        if (targetTimeout) clearTimeout(targetTimeout);
+        targetTimeout = setTimeout(() => { targetGroup.style.opacity = '0'; }, 900);
+
+        // 更新坐标显示
+        coordsDisplay.innerHTML = `X: ${Math.round(x)} &nbsp; Y: ${Math.round(y)}${label ? ' &nbsp;→&nbsp; ' + label : ''}`;
+
+        // 高亮导航按钮
+        navBtns.forEach(b => b.classList.remove('active'));
+        if (label) {
+            const btn = document.querySelector(`.nav-btn[data-room="${label.toLowerCase()}"]`);
+            if (btn) btn.classList.add('active');
+        }
+    }
+
+    // ========== 导航 ==========
+    function navigateTo(room) {
+        const pos = ROOM_POSITIONS[room];
+        if (!pos) return;
+        moveRobotTo(pos.x, pos.y, room.toUpperCase());
+        speak(`正在前往${getRoomCN(room)}`);
+    }
+
+    function comeToMe() {
+        moveRobotTo(MY_POSITION.x, MY_POSITION.y, 'MY LOCATION');
+        speak('好的，我马上来到您身边');
+    }
+
+    function getRoomCN(key) {
+        const map = { living:'客厅', kitchen:'厨房', bedroom:'主卧', study:'书房', dining:'餐厅' };
+        return map[key] || key;
+    }
+
+    // ========== 点击地图（SVG坐标反向映射，缩放无误差） ==========
+    svg.addEventListener('click', e => {
+        // 通过 getScreenCTM 逆矩阵将屏幕坐标转为SVG坐标
+        const pt = svg.createSVGPoint();
+        pt.x = e.clientX;
+        pt.y = e.clientY;
+        const ctm = svg.getScreenCTM();
+        if (!ctm) return;
+        const svgPt = pt.matrixTransform(ctm.inverse());
+        moveRobotTo(svgPt.x, svgPt.y, '');
+    });
+
+    // ========== 语音控制 ==========
+    let recognition = null, isListening = false;
+
+    function toggleVoice() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert('请使用 Chrome / Edge 浏览器以支持语音识别');
+            return;
+        }
+        isListening ? stopVoice() : startVoice();
+    }
+
+    function startVoice() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SR();
+        recognition.lang = 'zh-CN';
+        recognition.continuous = true;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+            isListening = true;
+            voiceBtn.classList.add('listening');
+            voiceHint.textContent = '🔴 正在聆听…';
         };
-      }
+        recognition.onresult = e => {
+            const cmd = e.results[e.results.length-1][0].transcript.trim();
+            voiceHint.textContent = `识别: "${cmd}"`;
+            parseCommand(cmd);
+        };
+        recognition.onerror = () => stopVoice();
+        recognition.onend   = () => { if (isListening) recognition.start(); };
+        recognition.start();
+    }
 
-      // 初始化花瓣池
-      function initPetals(count) {
-        petals = [];
-        for (let i = 0; i < count; i++) {
-          const p = createPetal();
-          p.y = centerY - 20 - Math.random() * 80; // 从花朵附近开始
-          petals.push(p);
-        }
-      }
-      initPetals(maxPetals);
+    function stopVoice() {
+        isListening = false;
+        if (recognition) recognition.stop();
+        voiceBtn.classList.remove('listening');
+        voiceHint.textContent = '点击开启语音指令';
+    }
 
-      // 更新花瓣
-      function updatePetals(elapsed) {
-        for (let p of petals) {
-          if (elapsed < p.delay) continue; // 延迟出现
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rotation += p.rotSpeed;
-          // 边界重置：飘出画面或太远则重新生成
-          if (p.y > height + 50 || p.x < -80 || p.x > width + 80 || p.y < -100) {
-            Object.assign(p, createPetal());
-            p.y = centerY - 30;
-            p.x = centerX + (Math.random() - 0.5) * 100;
-          }
-        }
-      }
+    function parseCommand(cmd) {
+        if (/身边|过来|回来|找我/.test(cmd))      comeToMe();
+        else if (/客厅/.test(cmd))                 navigateTo('living');
+        else if (/厨房/.test(cmd))                 navigateTo('kitchen');
+        else if (/卧室|主卧/.test(cmd))             navigateTo('bedroom');
+        else if (/书房/.test(cmd))                 navigateTo('study');
+        else if (/餐厅/.test(cmd))                 navigateTo('dining');
+        else speak('未识别到有效指令，请重试');
+    }
 
-      // 绘制单个飘落花瓣形状（心形 / 康乃馨花瓣简化）
-      function drawFloatingPetal(ctx, x, y, size, rotation, opacity, colorBase) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(rotation);
-        ctx.globalAlpha = opacity;
-        // 用两个椭圆组成心形花瓣
-        ctx.beginPath();
-        const s = size * 0.5;
-        ctx.ellipse(-s * 0.45, -s * 0.25, s * 0.4, s * 0.8, -0.4, 0, Math.PI * 2);
-        ctx.ellipse(s * 0.45, -s * 0.25, s * 0.4, s * 0.8, 0.4, 0, Math.PI * 2);
-        ctx.fillStyle = colorBase + opacity + ')';
-        ctx.fill();
-        ctx.restore();
-      }
+    function speak(text) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'zh-CN'; u.rate = 1.1;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+    }
 
-      // ---------- 绘制康乃馨（多层锯齿花瓣） ----------
-      function drawCarnation(bloomProgress) {
-        // bloomProgress: 0 花苞 -> 1 完全盛开
-        const layers = 6;          // 花瓣层数
-        const petalsPerLayer = 12; // 每层花瓣数
-        const baseRadius = Math.min(width, height) * 0.18;
-        const maxScale = 1.0;
-        // 花苞时花瓣极度内收，radiusFactor 从0.2变到1.0
-        const radiusFactor = 0.2 + bloomProgress * 0.8;
-        const scaleFactor = 0.3 + bloomProgress * 0.7; // 花瓣大小缩放
-
-        ctx.save();
-        ctx.translate(centerX, centerY);
-
-        // 逐层绘制，外层先画，内层后画（形成层叠效果）
-        for (let l = layers; l >= 0; l--) {
-          const layerProgress = l / layers; // 0(中心) ~ 1(最外层)
-          // 该层半径：花苞时所有层挤在一起，盛开时外扩
-          const layerRadius = baseRadius * (0.35 + layerProgress * 1.2) * radiusFactor;
-          // 内层颜色深，外层颜色浅
-          const redBase = 210 + Math.floor(layerProgress * 45);
-          const greenBase = 30 + Math.floor(layerProgress * 40);
-          const blueBase = 60 + Math.floor(layerProgress * 40);
-          const colorInner = `rgb(${redBase}, ${greenBase}, ${blueBase})`;
-          const colorOuter = `rgb(${redBase + 30}, ${greenBase + 30}, ${blueBase + 40})`;
-
-          // 每层花瓣绕圈分布
-          const petalsCount = petalsPerLayer - l * 2; // 外层花瓣少一点，内层密集
-          const angleStep = (Math.PI * 2) / petalsCount;
-
-          for (let i = 0; i < petalsCount; i++) {
-            const angle = i * angleStep + (l * 0.25); // 每层错开角度
-            const x = Math.cos(angle) * layerRadius;
-            const y = Math.sin(angle) * layerRadius;
-
-            ctx.save();
-            ctx.translate(x, y);
-            // 花瓣朝外倾斜
-            ctx.rotate(angle + Math.PI / 2 + (Math.random() - 0.5) * 0.2 * bloomProgress);
-
-            // 花瓣大小：内层小，外层大，并随 bloom 缩放
-            const petalLength = baseRadius * (0.45 + layerProgress * 0.7) * scaleFactor * (0.8 + Math.random() * 0.4);
-            const petalWidth = petalLength * (0.35 + Math.random() * 0.2);
-
-            // 绘制锯齿花瓣（用多个椭圆/波浪边模拟）
-            ctx.beginPath();
-            // 使用三次贝塞尔曲线画一个带波浪边的水滴形
-            const waveCount = 5;
-            const stepAngle = Math.PI / (waveCount + 1);
-            // 左侧波浪
-            ctx.moveTo(0, -petalLength * 0.15); // 花心连接处
-            for (let w = 0; w <= waveCount; w++) {
-              const t = w / waveCount;
-              const px = -Math.sin(t * Math.PI) * petalWidth * (1 - t * 0.5);
-              const py = -petalLength * 0.2 - t * petalLength * 0.8;
-              // 波浪偏移
-              const waveOffset = Math.sin(t * Math.PI * 2) * petalWidth * 0.25 * (1 - t);
-              ctx.lineTo(px + waveOffset * 0.6, py);
-            }
-            // 右侧波浪（反向回来）
-            for (let w = waveCount; w >= 0; w--) {
-              const t = w / waveCount;
-              const px = Math.sin(t * Math.PI) * petalWidth * (1 - t * 0.5);
-              const py = -petalLength * 0.2 - t * petalLength * 0.8;
-              const waveOffset = Math.sin(t * Math.PI * 2) * petalWidth * 0.25 * (1 - t);
-              ctx.lineTo(px + waveOffset * 0.6, py);
-            }
-            ctx.closePath();
-
-            // 渐变色填充
-            const gradient = ctx.createLinearGradient(0, -petalLength * 0.2, 0, -petalLength);
-            gradient.addColorStop(0, colorInner);
-            gradient.addColorStop(0.6, colorOuter);
-            gradient.addColorStop(1, '#f8bbd0');
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(180, 40, 70, 0.25)';
-            ctx.lineWidth = 0.6;
-            ctx.stroke();
-
-            ctx.restore();
-          }
-        }
-
-        // 花蕊（中心绒毛感）
-        ctx.beginPath();
-        ctx.arc(0, 0, baseRadius * 0.15 * scaleFactor, 0, Math.PI * 2);
-        ctx.fillStyle = '#f9f3b0';
-        ctx.fill();
-        for (let i = 0; i < 8; i++) {
-          const a = (i / 8) * Math.PI * 2;
-          const rx = Math.cos(a) * baseRadius * 0.12;
-          const ry = Math.sin(a) * baseRadius * 0.12;
-          ctx.beginPath();
-          ctx.arc(rx, ry, baseRadius * 0.04, 0, Math.PI * 2);
-          ctx.fillStyle = '#fff9c4';
-          ctx.fill();
-        }
-
-        ctx.restore();
-      }
-
-      // ---------- 绘制背景光晕 ----------
-      function drawGlow() {
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        const glowSize = Math.min(width, height) * 0.5;
-        const gradient = ctx.createRadialGradient(0, 0, glowSize * 0.3, 0, 0, glowSize);
-        gradient.addColorStop(0, 'rgba(255, 235, 238, 0.5)');
-        gradient.addColorStop(0.6, 'rgba(248, 187, 208, 0.2)');
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
-        ctx.restore();
-      }
-
-      // ---------- 动画循环 ----------
-      function animate(timestamp) {
-        if (!animationStart) animationStart = timestamp;
-        const elapsed = timestamp - animationStart;
-
-        ctx.clearRect(0, 0, width, height);
-
-        // 背景光晕
-        drawGlow();
-
-        // 盛开进度 (0->1)
-        let bloomProgress = Math.min(elapsed / bloomDuration, 1.0);
-        // 使用缓出函数让绽放更自然
-        bloomProgress = 1 - Math.pow(1 - bloomProgress, 3); // ease-out cubic
-
-        // 绘制康乃馨
-        drawCarnation(bloomProgress);
-
-        // 更新并绘制飘落花瓣（花苞阶段少量飘落，盛开后增多）
-        const activePetalCount = bloomProgress < 0.4 ? 5 : (bloomProgress < 0.8 ? 20 : maxPetals);
-        updatePetals(elapsed);
-        for (let i = 0; i < petals.length; i++) {
-          if (i < activePetalCount) {
-            const p = petals[i];
-            if (elapsed >= p.delay) {
-              drawFloatingPetal(ctx, p.x, p.y, p.size, p.rotation, p.opacity, p.color);
-            }
-          }
-        }
-
-        // 文字渐显 (在花朵基本盛开后)
-        if (elapsed > totalDuration) {
-          blessing.classList.add('show');
-        }
-
-        // 继续动画循环（飘落持续）
-        requestAnimationFrame(animate);
-      }
-
-      // 启动！
-      resize(); // 确保中心点正确
-      requestAnimationFrame(animate);
-
-      // 点击或触摸时增加飘落花瓣小惊喜
-      window.addEventListener('click', (e) => {
-        const x = e.clientX;
-        const y = e.clientY;
-        // 添加几个临时花瓣从点击位置飘出
-        for (let i = 0; i < 3; i++) {
-          petals.push({
-            x: x,
-            y: y,
-            vx: (Math.random() - 0.5) * 2.5,
-            vy: Math.random() * -2 - 1,
-            size: Math.random() * 30 + 15,
-            rotation: Math.random() * Math.PI * 2,
-            rotSpeed: (Math.random() - 0.5) * 0.08,
-            opacity: 0.9,
-            color: `rgba(255, ${100 + Math.floor(Math.random() * 80)}, ${130 + Math.floor(Math.random() * 70)}, `,
-            delay: 0,
-          });
-        }
-        // 防止花瓣数量无限增多，保留上限
-        if (petals.length > maxPetals + 15) {
-          petals.splice(0, petals.length - maxPetals - 10);
-        }
-      });
-    })();
-  </script>
+    // 初始化
+    moveRobotTo(240, 180, '');
+</script>
 </body>
 </html>
